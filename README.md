@@ -1,2 +1,2 @@
 # unit-report-api
-A Laravel REST API for reporting unit problems — practice project
+A Laravel REST API for reporting unit problems
