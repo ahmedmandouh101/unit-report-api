@@ -42,9 +42,22 @@ class UnitReportController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $reports = UnitReport::where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(10);
+        $request->validate([
+            'type'   => ['sometimes', 'in:cleanliness,maintenance,noise,other'],
+            'status' => ['sometimes', 'in:pending,in_review,resolved'],
+        ]);
+        
+        $query = UnitReport::where('user_id', $request->user()->id)
+            ->latest();
+            if ($request->filled('type')) {
+            $query->where('type', $request->type);
+            }
+            if ($request->filled('status')) {
+            $query->where('status', $request->status);
+            }
+
+        $reports = $query->paginate(10);
+
 
         return response()->json([
             'data' => UnitReportResource::collection($reports),
@@ -56,4 +69,5 @@ class UnitReportController extends Controller
             ],
         ]);
     }
+
 }
