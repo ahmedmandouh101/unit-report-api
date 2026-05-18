@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUnitReportRequest;
 use App\Http\Resources\UnitReportResource;
 use App\Models\UnitReport;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UnitReportController extends Controller
 {
@@ -37,5 +38,22 @@ class UnitReportController extends Controller
             'message' => 'Report submitted successfully.',
             'data'    => new UnitReportResource($report),
         ], 201);
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $reports = UnitReport::where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate(10);
+
+        return response()->json([
+            'data' => UnitReportResource::collection($reports),
+            'meta' => [
+                'current_page' => $reports->currentPage(),
+                'last_page'    => $reports->lastPage(),
+                'per_page'     => $reports->perPage(),
+                'total'        => $reports->total(),
+            ],
+        ]);
     }
 }
