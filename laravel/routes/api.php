@@ -10,3 +10,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+// add admin can update report status
+Route::middleware(['auth:sanctum', 'can:manage-reports'])->group(function () {
+    Route::patch('/reports/{report}/status', [UnitReportController::class, 'updateStatus']);
+});

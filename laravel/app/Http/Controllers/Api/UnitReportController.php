@@ -81,4 +81,32 @@ class UnitReportController extends Controller
         ]);
     }
 
+    public function updateStatus(Request $request, UnitReport $report): JsonResponse
+{
+    $request->validate([
+        'status' => ['required', 'in:pending,in_review,resolved'],
+    ]);
+
+    $allowedTransitions = [
+        'pending'   => 'in_review',
+        'in_review' => 'resolved',
+        'resolved'  => null,
+    ];
+
+    $allowed = $allowedTransitions[$report->status];
+
+    if ($request->status !== $allowed) {
+        return response()->json([
+            'message' => "Invalid transition. Status '{$report->status}' can only move to '{$allowed}'.",
+        ], 422);
+    }
+
+    $report->update(['status' => $request->status]);
+
+    return response()->json([
+        'message' => 'Report status updated successfully.',
+        'data'    => new UnitReportResource($report),
+    ]);
+}
+
 }
