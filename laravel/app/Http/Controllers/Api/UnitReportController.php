@@ -26,6 +26,17 @@ class UnitReportController extends Controller
             ], 403);
         }
 
+        // add a role that the guest can only submit one report per booking
+        $existingReport = UnitReport::where('user_id', $request->user()->id)
+            ->where('booking_id', $request->booking_id)
+            ->first();
+
+        if ($existingReport) {
+            return response()->json([
+                'message' => 'You have already submitted a report for this booking.',
+            ], 409);
+        }
+
         $report = UnitReport::create([
             'user_id'     => $request->user()->id,
             'unit_id'     => $request->unit_id,
@@ -46,7 +57,7 @@ class UnitReportController extends Controller
             'type'   => ['sometimes', 'in:cleanliness,maintenance,noise,other'],
             'status' => ['sometimes', 'in:pending,in_review,resolved'],
         ]);
-        
+
         $query = UnitReport::where('user_id', $request->user()->id)
             ->latest();
             if ($request->filled('type')) {
